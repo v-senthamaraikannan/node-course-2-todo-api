@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+const {ObjectID} = require('mongodb');
 
 var app = express();
 
@@ -37,6 +38,25 @@ app.get('/todos', (req,res) =>{
   });
 });
 
+//GET/todos/123545 => URL Parameters
+app.get('/todos/:id',(req,res)=>{
+  var id = req.params.id;
+  if(!ObjectID.isValid){
+    res.status(404).send();
+  }
+  Todo.findById(id).then((todo)=>{
+    if(!todo){
+      res.status(404).send();
+    }
+    res.send(todo);
+  }).catch((e) =>{
+    res.status(400).send();
+  })
+  // validate ID using isValid
+   // 404 - send empty
+
+});
+
 app.get('/users', (req,res) =>{
   User.find().then((users) =>{
     res.send({users});
@@ -44,6 +64,8 @@ app.get('/users', (req,res) =>{
      res.status(400).send(e);
   });
 });
+
+
 
 app.post('/users', (req,res) =>{
    var user = new User ({
